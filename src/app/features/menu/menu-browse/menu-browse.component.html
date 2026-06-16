@@ -1,0 +1,72 @@
+<div class="menu-browse-wrapper">
+  <div class="menu-browse-container">
+    <!-- Header -->
+    <div class="page-header">
+      <h1>🍽️ Today's Menu</h1>
+      <p class="subtitle">Browse and add items to your cart</p>
+    </div>
+
+    <!-- Error Alert -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <span class="alert-icon">⚠️</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading menu items...</p>
+    </div>
+
+    <!-- Search Bar (shown when not loading) -->
+    <div *ngIf="!isLoading" class="search-section">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="🔍 Search dishes..."
+        (input)="onSearch($event)"
+      />
+    </div>
+
+    <!-- Filter Buttons (shown when not loading) -->
+    <div *ngIf="!isLoading" class="filters">
+      <button
+        *ngFor="let filter of ['ALL', 'VEG', 'NON_VEG', 'VEGAN', 'JAIN']"
+        [class.active]="activeFilter === filter"
+        class="filter-btn"
+        (click)="applyFilter(filter)"
+      >
+        {{ filter === 'ALL' ? 'All' : filter.replace('_', ' ') }}
+      </button>
+    </div>
+
+    <!-- Menu Items Grid -->
+    <div *ngIf="!isLoading && items.length > 0" class="items-grid">
+      <div *ngFor="let item of items; trackBy: trackByItemId" class="menu-card">
+        <div class="card-header">
+          <h3>{{ item.itemName }}</h3>
+        </div>
+
+        <div class="card-body">
+          <p class="vendor-info">
+            <span class="vendor-name">{{ item.vendorName }}</span>
+            <span class="separator">·</span>
+            <span class="food-type">{{ item.foodType }}</span>
+          </p>
+        </div>
+
+        <div class="card-footer">
+          <div class="price">₹{{ item.price | number: '1.2-2' }}</div>
+          <button class="btn-add">Add to Cart →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && items.length === 0 && !errorMessage" class="empty-state">
+      <div class="empty-icon">🍽️</div>
+      <h2>No Items Available</h2>
+      <p>No menu items match your search or filter. Try adjusting your criteria.</p>
+    </div>
+  </div>
+</div>
