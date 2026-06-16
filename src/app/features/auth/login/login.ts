@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { LoginRequest } from '../../../models/auth.models';
+import { APP_ROLES, LoginRequest } from '../../../models/auth.models';
 
 @Component({
   selector: 'app-login',
@@ -49,11 +49,14 @@ export class LoginComponent {
 
   private redirectByRole(role: string): void {
     switch (role) {
-      case 'ADMIN':
+      case APP_ROLES.admin:
         this.router.navigate(['/admin']);
         break;
-      case 'COUNTER':
+      case APP_ROLES.counter:
         this.router.navigate(['/counter']);
+        break;
+      case APP_ROLES.vendor:
+        this.router.navigate(['/menu/manage']);
         break;
       default:
         this.router.navigate(['/menu']);

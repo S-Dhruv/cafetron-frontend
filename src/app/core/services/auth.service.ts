@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import {
+  APP_ROLES,
   AuthResponse,
   LoginRequest,
   RegisterRequest,
@@ -13,7 +15,7 @@ import {
 })
 export class AuthService {
 
-  private readonly API = 'http://localhost:8081/api';
+  private readonly API = environment.apiUrl;
   private readonly TOKEN_KEY = 'jwt_token';
   private readonly LEGACY_TOKEN_KEYS = ['cafetron_token', 'auth_token'];
   private readonly USER_KEY = 'cafetron_user';
@@ -56,6 +58,20 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
   }
 
+  private getStoredUser(): AuthResponse | null {
+    const user = localStorage.getItem(this.USER_KEY);
+    if (!user) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(user) as AuthResponse;
+    } catch {
+      localStorage.removeItem(this.USER_KEY);
+      return null;
+    }
+  }
+
   getToken(): string | null {
     const primary = localStorage.getItem(this.TOKEN_KEY);
     if (primary) {
@@ -79,14 +95,32 @@ export class AuthService {
   }
 
   getRole(): string | null {
-    const user = localStorage.getItem(this.USER_KEY);
-    if (!user) return null;
-    return JSON.parse(user).role;
+    return this.getStoredUser()?.role ?? null;
   }
 
   getUserName(): string | null {
-    const user = localStorage.getItem(this.USER_KEY);
-    if (!user) return null;
-    return JSON.parse(user).name;
+    return this.getStoredUser()?.name ?? null;
+  }
+
+  getUserEmail(): string | null {
+    return this.getStoredUser()?.email ?? null;
+  }
+
+  hasRole(...roles: string[]): boolean {
+    const role = this.getRole();
+    return !!role && roles.includes(role);
+  }
+
+  getDefaultRoute(): string {
+    switch (this.getRole()) {
+      case APP_ROLES.admin:
+        return '/admin';
+      case APP_ROLES.counter:
+        return '/counter';
+      case APP_ROLES.vendor:
+        return '/menu/manage';
+      default:
+        return '/menu';
+    }
   }
 }
