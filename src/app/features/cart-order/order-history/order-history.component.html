@@ -83,7 +83,7 @@
       <span class="material-symbols-outlined">account_balance_wallet</span>
       <span>Wallet</span>
     </a>
-    <a routerLink="/pickup/qr">
+    <a [routerLink]="orders.length ? ['/pickup/qr', orders[0].orderId] : ['/orders']">
       <span class="material-symbols-outlined">qr_code_scanner</span>
       <span>Pickup</span>
     </a>

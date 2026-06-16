@@ -9,6 +9,9 @@ import { MenuBrowseComponent } from './features/menu/menu-browse/menu-browse.com
 
 // Menu Management Components
 import { MenuManageComponent } from './features/menu/menu-manage/menu-manage.component';
+import { OrderQRDisplayComponent } from './features/order-qr/order-qr-display/order-qr-display.component';
+import { OrderQrScannerComponent } from './features/order-qr/order-qr-scanner/order-qr-scanner.component';
+import { OrderQRUploadComponent } from './features/order-qr/order-qr-upload/order-qr-upload.component';
 
 // Vendor Management Components
 import { VendorManageComponent } from './features/vendor/vendor-manage/vendor-manage.component';
@@ -161,13 +164,28 @@ export const routes: Routes = [
   {
     path: 'pickup',
     pathMatch: 'full',
-    redirectTo: 'pickup/qr',
+    redirectTo: 'pickup/scan',
   },
-  featureRoute({
-    path: 'pickup/qr',
+  {
+    path: 'pickup/scan',
+    title: 'Scan Pickup QR',
+    component: OrderQrScannerComponent,
+  },
+  {
+    path: 'pickup/upload',
+    title: 'Upload Pickup QR',
+    component: OrderQRUploadComponent,
+  },
+  {
+    path: 'pickup/qr/:orderId',
     title: 'Pickup QR',
-    componentPath: 'features/pickup-scanner/qr-view/qr-view.component',
-  }),
+    component: OrderQRDisplayComponent,
+  },
+  {
+    path: 'pickup/qr',
+    pathMatch: 'full',
+    redirectTo: 'orders',
+  },
   {
     path: 'counter',
     pathMatch: 'full',

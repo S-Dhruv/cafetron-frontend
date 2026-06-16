@@ -22,5 +22,8 @@
       <span class="material-symbols-outlined">{{ isUploading ? 'sync' : 'cloud_upload' }}</span>
       {{ isUploading ? 'Uploading...' : 'Upload QR' }}
     </button>
+
+    <p class="result" *ngIf="successMessage">{{ successMessage }}</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
   </form>
 </section>
