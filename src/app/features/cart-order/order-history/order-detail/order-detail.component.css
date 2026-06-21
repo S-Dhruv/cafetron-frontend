@@ -222,6 +222,14 @@
   opacity: 0.55;
 }
 
+.timeout-window-message {
+  margin: -8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
 .state-card {
   display: grid;
   gap: 12px;

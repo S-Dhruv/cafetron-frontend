@@ -5,6 +5,7 @@ export interface PlaceOrderItemRequest {
 
 export interface PlaceOrderRequest {
   pickupSlot: string;
+  pickupSlotTime: string;
   location: string;
   pickupTimeZone: string;
   items: PlaceOrderItemRequest[];

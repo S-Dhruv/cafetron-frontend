@@ -21,6 +21,8 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   isProcessingTimeout: boolean = false;
   private destroy$ = new Subject<void>();
+  private timeoutWindowTimerId: ReturnType<typeof setInterval> | null = null;
+  private readonly userTimeoutWindowMinutes = 5;
 
   constructor(
     private orderApi: OrderApiService,
@@ -60,6 +62,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
           console.log('✅ Order detail loaded:', order);
           console.log('✅ Setting order and isLoading = false');
           this.order = order;
+          this.startTimeoutWindowTimer();
           this.isLoading = false;
           this.cdr.markForCheck();
           console.log('✅ After update - isLoading:', this.isLoading, 'order:', this.order);
@@ -78,7 +81,12 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   }
 
   onProcessTimeout(): void {
-    if (!this.order || this.isOrderClosed()) return;
+    if (!this.order || !this.canRequestTimeout()) {
+      this.errorMessage = this.isTimeoutWindowExpired()
+        ? 'Timeout can only be requested within 5 minutes of placing the order.'
+        : '';
+      return;
+    }
 
     if (!confirm('Are you sure you want to request a timeout for this order?')) {
       return;
@@ -131,7 +139,39 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
       return 'Processing...';
     }
 
+    if (this.isTimeoutWindowExpired() && !this.isOrderClosed()) {
+      return 'Timeout Window Expired';
+    }
+
     return this.isOrderClosed() ? 'Order Cancelled' : 'Request Timeout';
+  }
+
+  canRequestTimeout(): boolean {
+    return !!this.order && !this.isOrderClosed() && !this.isTimeoutWindowExpired();
+  }
+
+  isTimeoutWindowExpired(): boolean {
+    if (!this.order?.createdAt) {
+      return true;
+    }
+
+    const deadline = this.getTimeoutDeadlineTime();
+    return Number.isNaN(deadline) || Date.now() > deadline;
+  }
+
+  getTimeoutWindowMessage(): string {
+    if (this.isOrderClosed()) {
+      return 'This order is already closed.';
+    }
+
+    if (this.isTimeoutWindowExpired()) {
+      return 'Timeout requests close 5 minutes after placing the order.';
+    }
+
+    return `Timeout available until ${new Date(this.getTimeoutDeadlineTime()).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`;
   }
 
   getStatusColor(status: string): string {
@@ -163,7 +203,24 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.timeoutWindowTimerId) {
+      clearInterval(this.timeoutWindowTimerId);
+    }
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private startTimeoutWindowTimer(): void {
+    if (this.timeoutWindowTimerId) {
+      clearInterval(this.timeoutWindowTimerId);
+    }
+
+    this.timeoutWindowTimerId = setInterval(() => {
+      this.cdr.markForCheck();
+    }, 1000);
+  }
+
+  private getTimeoutDeadlineTime(): number {
+    return new Date(this.order?.createdAt as string | Date).getTime() + this.userTimeoutWindowMinutes * 60 * 1000;
   }
 }

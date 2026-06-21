@@ -119,11 +119,14 @@
         id="order-detail-timeout-btn"
         class="timeout-btn"
         (click)="onProcessTimeout()"
-        [disabled]="isProcessingTimeout || isOrderClosed()"
+        [disabled]="isProcessingTimeout || !canRequestTimeout()"
         type="button"
       >
         {{ getTimeoutButtonLabel() }}
       </button>
+      <p id="order-detail-timeout-window-message" class="timeout-window-message">
+        {{ getTimeoutWindowMessage() }}
+      </p>
     </ng-container>
   </section>
 </main>

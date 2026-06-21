@@ -424,6 +424,27 @@ h4 {
   font-weight: 1000;
 }
 
+.time-slot.unavailable,
+.time-slot:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+  box-shadow: none;
+}
+
+.time-slot.unavailable:hover,
+.time-slot:disabled:hover {
+  border-color: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.slot-help {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
 .food-preview-list {
   display: grid;
   gap: 12px;

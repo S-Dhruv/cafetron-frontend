@@ -65,7 +65,7 @@
         id="checkout-step-tab-{{ i + 1 }}"
         [class.active]="activeStep === i"
         [class.done]="activeStep > i"
-        [disabled]="i > 0 && !selectedPickupSlot"
+        [disabled]="i > 0 && !isPickupSlotAvailable(selectedPickupSlot)"
         (click)="goToStep(i)"
         type="button"
       >
@@ -120,13 +120,18 @@
               id="checkout-card-pickup-slot-{{ i + 1 }}"
               class="time-slot"
               [class.selected]="selectedPickupSlot === slot"
-              (click)="selectedPickupSlot = slot"
+              [class.unavailable]="!isPickupSlotAvailable(slot)"
+              [disabled]="!isPickupSlotAvailable(slot)"
+              (click)="selectPickupSlot(slot)"
               type="button"
             >
               <strong>{{ getPickupSlotLabel(slot) }}</strong>
               <span>{{ getPickupSlotCaption(slot) }}</span>
             </button>
           </div>
+          <p *ngIf="!hasAvailablePickupSlots()" id="checkout-card-no-slots-message" class="slot-help">
+            No pickup slots are available at least 30 minutes from now.
+          </p>
         </ng-container>
 
         <ng-container *ngSwitchCase="1">
@@ -213,7 +218,7 @@
             id="checkout-card-place-order-btn"
             class="place-btn"
             (click)="onPlaceOrder()"
-            [disabled]="isLoading || cartItems.length === 0"
+            [disabled]="isLoading || cartItems.length === 0 || !isPickupSlotAvailable(selectedPickupSlot)"
             type="button"
           >
             <span>{{ isLoading ? 'Placing Order...' : 'Place Order' }}</span>
@@ -238,7 +243,7 @@
             id="checkout-card-next-step-btn"
             class="nav-btn primary"
             (click)="nextStep()"
-            [disabled]="activeStep === 0 && !selectedPickupSlot"
+            [disabled]="activeStep === 0 && !isPickupSlotAvailable(selectedPickupSlot)"
             type="button"
           >
             Next
@@ -287,13 +292,18 @@
             id="checkout-overview-pickup-slot-{{ i + 1 }}"
             class="time-slot"
             [class.selected]="selectedPickupSlot === slot"
-            (click)="selectedPickupSlot = slot"
+            [class.unavailable]="!isPickupSlotAvailable(slot)"
+            [disabled]="!isPickupSlotAvailable(slot)"
+            (click)="selectPickupSlot(slot)"
             type="button"
           >
             <strong>{{ getPickupSlotLabel(slot) }}</strong>
             <span>{{ getPickupSlotCaption(slot) }}</span>
           </button>
         </div>
+        <p *ngIf="!hasAvailablePickupSlots()" id="checkout-overview-no-slots-message" class="slot-help">
+          No pickup slots are available at least 30 minutes from now.
+        </p>
       </article>
 
       <article id="checkout-overview-food-card" class="overview-card">
@@ -372,7 +382,7 @@
           id="checkout-overview-place-order-btn"
           class="place-btn"
           (click)="onPlaceOrder()"
-          [disabled]="isLoading || cartItems.length === 0"
+          [disabled]="isLoading || cartItems.length === 0 || !isPickupSlotAvailable(selectedPickupSlot)"
           type="button"
         >
           <span>{{ isLoading ? 'Placing Order...' : 'Place Order' }}</span>
