@@ -62,9 +62,18 @@ export class TimezoneSetupComponent implements OnInit {
     this.router.navigateByUrl(returnUrl);
   }
 
+  selectTimeZone(timeZone: string): void {
+    this.selectedTimeZone = timeZone;
+    this.errorMessage = '';
+  }
+
   getTimeZoneLabel(timeZone: string): string {
     const option = this.timeZoneOptions.find((item) => item.id === timeZone);
     return option ? `${option.label} (${option.offset})` : timeZone.replace(/_/g, ' ');
+  }
+
+  getVisibleTimeZoneOptions(): TimeZoneOption[] {
+    return this.timeZoneOptions.slice(0, 12);
   }
 
   private loadTimeZoneOptions(detectedTimeZone: string): void {
