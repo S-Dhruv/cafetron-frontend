@@ -123,6 +123,7 @@
               [class.selected]="selectedPickupSlot === slot"
               [class.unavailable]="!isPickupSlotAvailable(slot)"
               [attr.aria-disabled]="!isPickupSlotAvailable(slot)"
+              (pointerdown)="onPickupSlotPointerDown(slot, $event)"
               (click)="selectPickupSlot(slot)"
               type="button"
             >
@@ -294,6 +295,7 @@
             [class.selected]="selectedPickupSlot === slot"
             [class.unavailable]="!isPickupSlotAvailable(slot)"
             [attr.aria-disabled]="!isPickupSlotAvailable(slot)"
+            (pointerdown)="onPickupSlotPointerDown(slot, $event)"
             (click)="selectPickupSlot(slot)"
             type="button"
           >

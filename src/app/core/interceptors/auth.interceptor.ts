@@ -1,8 +1,10 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+
+export const SKIP_AUTH_REDIRECT = new HttpContextToken<boolean>(() => false);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -21,7 +23,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
-        if (error.status === 401 && authService.isLoggedIn()) {
+        if (error.status === 401 && authService.isLoggedIn() && !req.context.get(SKIP_AUTH_REDIRECT)) {
           authService.logout();
           router.navigate(['/login']);
         }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -9,6 +9,7 @@ import {
   OrderDetailResponse,
 } from '../models/order.models';
 import { environment } from '../../../../environments/environment';
+import { SKIP_AUTH_REDIRECT } from '../../../core/interceptors/auth.interceptor';
 
 type OrderListPayload =
   | MyOrderSummaryResponse[]
@@ -26,7 +27,9 @@ export class OrderApiService {
 
   placeOrder(request: PlaceOrderRequest): Observable<PlaceOrderResponse> {
     console.log('POST /api/orders with:', request);
-    return this.http.post<PlaceOrderResponse>(this.API_URL, request);
+    return this.http.post<PlaceOrderResponse>(this.API_URL, request, {
+      context: new HttpContext().set(SKIP_AUTH_REDIRECT, true),
+    });
   }
 
   getMyOrders(): Observable<MyOrderSummaryResponse[]> {

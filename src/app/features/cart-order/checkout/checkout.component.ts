@@ -154,6 +154,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   setCheckoutView(view: 'cards' | 'overview'): void {
+    if (view === 'overview' && !this.hasValidPickupSlotSelected()) {
+      this.showToast(this.getPickupSlotRequiredMessage(), 'error');
+    }
+
     this.checkoutView = view;
   }
 
@@ -191,6 +195,17 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     }
 
     this.selectedPickupSlot = slot;
+    this.errorMessage = '';
+  }
+
+  onPickupSlotPointerDown(slot: string, event: PointerEvent): void {
+    if (this.isPickupSlotAvailable(slot)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.showToast(this.getInvalidPickupSlotMessage(slot), 'error');
   }
 
   hasAvailablePickupSlots(): boolean {
@@ -265,9 +280,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           console.error('   Message:', error.error?.message);
           console.error('   Error:', error.error);
 
+          const apiMessage = error.error?.message || error.error?.error;
           const statusMessage = error.status === 401
-            ? 'Unauthorized - Token issue or user not found'
-            : error.error?.message || 'Failed to place order. Please try again.';
+            ? 'Your session is not valid. Please log in again before placing the order.'
+            : apiMessage || 'Failed to place order. Please try again.';
 
           this.errorMessage = statusMessage;
           this.showToast(statusMessage, 'error');
