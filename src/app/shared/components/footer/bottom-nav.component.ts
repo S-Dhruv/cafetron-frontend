@@ -21,6 +21,22 @@ type NavItem = {
   imports: [CommonModule, RouterLink, RouterLinkActive],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <ng-container *ngIf="navItems.length > 0">
+      <button
+        id="bottom-nav-toggle-btn"
+        class="app-bottom-nav-toggle"
+        [class.is-footer-hidden]="isFooterHidden"
+        type="button"
+        (click)="toggleFooter()"
+        [attr.aria-label]="isFooterHidden ? 'Show footer navigation' : 'Hide footer navigation'"
+        [attr.aria-expanded]="!isFooterHidden"
+      >
+        <span class="material-symbols-outlined">
+          {{ isFooterHidden ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
+        </span>
+      </button>
+    </ng-container>
+
     <ng-container *ngIf="isVisible">
       <div class="app-bottom-nav-spacer" aria-hidden="true"></div>
 
@@ -47,6 +63,33 @@ type NavItem = {
     .app-bottom-nav-spacer {
       flex: 0 0 var(--app-bottom-nav-height);
       height: var(--app-bottom-nav-height);
+    }
+
+    .app-bottom-nav-toggle {
+      position: fixed;
+      right: 16px;
+      bottom: calc(var(--app-bottom-nav-height) + 18px);
+      z-index: 90;
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 50%;
+      background: rgba(17, 24, 32, 0.84);
+      color: #fff;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      backdrop-filter: blur(20px) saturate(1.2);
+      cursor: pointer;
+    }
+
+    .app-bottom-nav-toggle.is-footer-hidden {
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .app-bottom-nav-toggle .material-symbols-outlined {
+      font-size: 26px;
     }
 
     .app-bottom-nav {
@@ -124,8 +167,10 @@ type NavItem = {
 })
 export class BottomNavComponent implements OnInit, OnDestroy {
   isVisible = false;
+  isFooterHidden = false;
   navItems: NavItem[] = [];
 
+  private footerHiddenOverride: boolean | null = null;
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -153,18 +198,19 @@ export class BottomNavComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private refreshState(url: string): void {
-    if (this.shouldHideFooter()) {
-      this.navItems = [];
-      this.isVisible = false;
-      this.cdr.markForCheck();
-      return;
-    }
+  toggleFooter(): void {
+    this.footerHiddenOverride = !this.isFooterHidden;
+    this.isFooterHidden = this.footerHiddenOverride;
+    this.isVisible = this.navItems.length > 0 && !this.isFooterHidden;
+    this.cdr.markForCheck();
+  }
 
+  private refreshState(url: string): void {
     this.navItems = this.authService.isLoggedIn()
       ? this.getNavItemsForRole()
       : this.getPublicNavItems(url);
-    this.isVisible = this.navItems.length > 0;
+    this.isFooterHidden = this.footerHiddenOverride ?? this.shouldHideFooter();
+    this.isVisible = this.navItems.length > 0 && !this.isFooterHidden;
     this.cdr.markForCheck();
   }
 
