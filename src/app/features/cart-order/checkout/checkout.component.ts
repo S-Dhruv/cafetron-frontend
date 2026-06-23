@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -222,10 +223,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.router.navigate(['/orders', response.orderId]);
         },
         error: (error) => {
-          const apiMessage = error.error?.message || error.error?.error;
-          const statusMessage = error.status === 401
+          const statusMessage = error instanceof HttpErrorResponse && error.status === 401
             ? 'Your session is not valid. Please log in again before placing the order.'
-            : apiMessage || 'Failed to place order. Please try again.';
+            : this.getOrderErrorMessage(error);
 
           this.errorMessage = statusMessage;
           this.showToast(statusMessage, 'error');
@@ -275,6 +275,90 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   private getInvalidPickupSlotMessage(slot: PickupWindow): string {
     return `${slot.label} pickup is closed for today. Please choose an available pickup window.`;
+  }
+
+  private getOrderErrorMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'Failed to place order. Please try again.';
+    }
+
+    const responseError = error.error;
+
+    if (typeof responseError === 'string') {
+      return responseError.trim() || 'Failed to place order. Please try again.';
+    }
+
+    if (responseError && typeof responseError === 'object') {
+      const payload = responseError as Record<string, unknown>;
+      const directMessage = this.firstStringValue(payload, ['message', 'error', 'detail', 'reason', 'title']);
+
+      if (directMessage) {
+        return directMessage;
+      }
+
+      const fieldErrors = this.getFieldErrorMessages(payload);
+      if (fieldErrors.length > 0) {
+        return fieldErrors.join(' ');
+      }
+    }
+
+    if (error.status === 0) {
+      return 'Unable to reach the server. Please check your connection and try again.';
+    }
+
+    return 'Failed to place order. Please try again.';
+  }
+
+  private firstStringValue(payload: Record<string, unknown>, keys: string[]): string {
+    for (const key of keys) {
+      const value = payload[key];
+      if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+      }
+    }
+
+    return '';
+  }
+
+  private getFieldErrorMessages(payload: Record<string, unknown>): string[] {
+    const rawErrors = payload['errors'];
+    if (!rawErrors) {
+      return [];
+    }
+
+    if (Array.isArray(rawErrors)) {
+      return rawErrors
+        .map((item) => {
+          if (typeof item === 'string') {
+            return item.trim();
+          }
+
+          if (item && typeof item === 'object') {
+            return this.firstStringValue(item as Record<string, unknown>, ['defaultMessage', 'message']);
+          }
+
+          return '';
+        })
+        .filter((message) => message.length > 0);
+    }
+
+    if (typeof rawErrors === 'object') {
+      return Object.values(rawErrors as Record<string, unknown>)
+        .map((value) => {
+          if (typeof value === 'string') {
+            return value.trim();
+          }
+
+          if (Array.isArray(value)) {
+            return value.filter((item): item is string => typeof item === 'string').join(' ').trim();
+          }
+
+          return '';
+        })
+        .filter((message) => message.length > 0);
+    }
+
+    return [];
   }
 
   private resolvePickupSlot(slotOrId: PickupWindow | string): PickupWindow | null {

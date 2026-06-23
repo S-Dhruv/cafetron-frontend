@@ -2,7 +2,7 @@ export interface WalletResponseDto {
     walletId: number;
     userId: number;
     balance: number;
-    updatedAt: string;
+    updatedAt: string | number[];
 }
 
 export interface TransactionResponseDto {
@@ -11,7 +11,7 @@ export interface TransactionResponseDto {
     amount: number;
     description: string;
     orderId: number | null;
-    createdAt: string;
+    createdAt: string | number[];
 }
 
 export interface PagedTransactionDto {

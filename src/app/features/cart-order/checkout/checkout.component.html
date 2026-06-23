@@ -211,6 +211,15 @@
             <span>{{ isLoading ? 'Placing Order...' : 'Place Order' }}</span>
             <span class="material-symbols-outlined">arrow_forward</span>
           </button>
+          <p
+            id="checkout-card-place-order-error"
+            *ngIf="errorMessage"
+            class="place-order-error"
+            role="alert"
+          >
+            <span class="material-symbols-outlined">error</span>
+            <span>{{ errorMessage }}</span>
+          </p>
           <p class="terms">By placing your order, you agree to Cafetron's Terms of Service.</p>
         </ng-container>
 
@@ -360,6 +369,15 @@
           <span>{{ isLoading ? 'Placing Order...' : 'Place Order' }}</span>
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
+        <p
+          id="checkout-overview-place-order-error"
+          *ngIf="errorMessage"
+          class="place-order-error"
+          role="alert"
+        >
+          <span class="material-symbols-outlined">error</span>
+          <span>{{ errorMessage }}</span>
+        </p>
       </article>
     </section>
   </section>

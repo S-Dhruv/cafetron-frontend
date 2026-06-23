@@ -19,7 +19,7 @@
         <div class="meta-grid">
           <p id="wallet-id-field"><span>Wallet ID</span>{{ currentWallet.walletId }}</p>
           <p id="wallet-user-id-field"><span>User ID</span>{{ currentWallet.userId }}</p>
-          <p id="wallet-updated-at-field"><span>Updated</span>{{ currentWallet.updatedAt }}</p>
+          <p id="wallet-updated-at-field"><span>Updated</span>{{ formatDateTime(currentWallet.updatedAt) }}</p>
         </div>
       </section>
 
@@ -60,7 +60,7 @@
           </div>
           <div id="wallet-transaction-meta-{{ i + 1 }}" class="tx-right">
             <span id="wallet-transaction-amount-{{ i + 1 }}">{{ tx.amount | currency:'INR' }}</span>
-            <small id="wallet-transaction-created-at-{{ i + 1 }}">{{ tx.createdAt }}</small>
+            <small id="wallet-transaction-created-at-{{ i + 1 }}">{{ formatDateTime(tx.createdAt) }}</small>
           </div>
         </article>
       </div>

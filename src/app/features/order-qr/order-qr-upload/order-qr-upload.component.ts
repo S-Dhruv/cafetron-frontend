@@ -3,6 +3,7 @@ import { Component, EventEmitter, Output } from "@angular/core";
 import { QRValidationResponse } from "../order-qr.models";
 import { OrderQRService } from "../order-qr.service";
 import { FormsModule } from "@angular/forms";
+import { getApiErrorMessage } from "../../../core/utils/api-error.util";
 
 @Component({
     standalone: true,
@@ -51,7 +52,7 @@ export class OrderQRUploadComponent {
                 this.uploadCompleted.emit(response);
             },
             error: (err) => {
-                this.errorMessage = err?.error?.message || 'Upload failed. Please try another image.';
+                this.errorMessage = getApiErrorMessage(err, 'Upload failed. Please try another image.');
             },
             complete: () => {
                 this.isUploading = false;

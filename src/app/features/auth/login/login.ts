@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { getApiErrorMessage, isBadCredentialError } from '../../../core/utils/api-error.util';
 import { LoginRequest } from '../../../models/auth.models';
 
 @Component({
@@ -41,7 +42,9 @@ export class LoginComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.error || 'Invalid email or password';
+        this.errorMessage = isBadCredentialError(err)
+          ? 'Invalid employee ID or password'
+          : getApiErrorMessage(err, 'Sign in failed. Please try again.');
         this.cdr.detectChanges();
       }
     });

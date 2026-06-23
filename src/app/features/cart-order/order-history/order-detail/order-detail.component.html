@@ -74,10 +74,10 @@
         id="order-detail-qr-section"
         *ngIf="order.qrToken"
         class="section qr-section"
-        [class.qr-section-disabled]="isOrderClosed()"
+        [class.qr-section-disabled]="!isPickupQrAvailable()"
       >
         <h2 class="section-title">📲 Pickup QR Code</h2>
-        <div class="qr-content" *ngIf="!isOrderClosed(); else disabledQr">
+        <div class="qr-content" *ngIf="isPickupQrAvailable(); else disabledQr">
           <p class="qr-description">Show this QR code at pickup</p>
           <!-- <div class="qr-token">{{ order.qrToken }}</div> -->
            <div id="order-detail-qr-token" class="qr-token"><order-qr-display id="order-detail-qr-display" [orderId]="order.orderId" /></div>
@@ -85,13 +85,13 @@
         <ng-template #disabledQr>
           <div id="order-detail-qr-disabled-message" class="qr-disabled-message">
             <span class="material-symbols-outlined">block</span>
-            <p>Pickup QR is disabled because this order is cancelled.</p>
+            <p>{{ getPickupQrUnavailableMessage() }}</p>
           </div>
         </ng-template>
         <!-- <code>{{ order.qrToken }}</code> -->
         <a
           id="order-detail-qr-view-link"
-          *ngIf="!isOrderClosed()"
+          *ngIf="isPickupQrAvailable()"
           class="qr-view-btn"
           [routerLink]="['/pickup/qr', order.orderId]"
         >
@@ -100,7 +100,7 @@
         </a>
         <button
           id="order-detail-qr-view-disabled-btn"
-          *ngIf="isOrderClosed()"
+          *ngIf="!isPickupQrAvailable()"
           class="qr-view-btn qr-view-btn-disabled"
           type="button"
           disabled

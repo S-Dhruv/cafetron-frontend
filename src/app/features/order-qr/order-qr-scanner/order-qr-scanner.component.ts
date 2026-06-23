@@ -4,6 +4,7 @@ import jsQR from "jsqr";
 import { OrderQRService } from "../order-qr.service";
 import { QRValidationResponse } from "../order-qr.models";
 import { OrderDetailResponse } from "../../cart-order/models/order.models";
+import { getApiErrorMessage } from "../../../core/utils/api-error.util";
 
 @Component({
     standalone: true,
@@ -119,8 +120,8 @@ export class OrderQrScannerComponent implements OnDestroy {
                 }
                 this.cdr.detectChanges();
             },
-            error: () => {
-                this.error = 'Failed to decode QR. Please try again.';
+            error: (err) => {
+                this.error = getApiErrorMessage(err, 'Failed to decode QR. Please try again.');
                 this.scanning = false;
                 this.cdr.detectChanges();
             }
@@ -138,8 +139,8 @@ export class OrderQrScannerComponent implements OnDestroy {
                 this.isLoadingPreview = false;
                 this.cdr.detectChanges();
             },
-            error: () => {
-                this.error = 'QR validated, but order details could not be loaded.';
+            error: (err) => {
+                this.error = getApiErrorMessage(err, 'QR validated, but order details could not be loaded.');
                 this.isLoadingPreview = false;
                 this.cdr.detectChanges();
             }

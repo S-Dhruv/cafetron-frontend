@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { getApiErrorMessage } from '../../../core/utils/api-error.util';
 import { RegisterRequest } from '../../../models/auth.models';
 
 @Component({
@@ -67,7 +68,7 @@ export class RegisterComponent {
       error: (err) => {
         this.isLoading.set(false);
         this.errorMessage.set(
-          err.error?.error || err.error?.message || 'Registration failed. Please try again.'
+          getApiErrorMessage(err, 'Registration failed. Please try again.')
         );
         this.cdr.detectChanges();
       }

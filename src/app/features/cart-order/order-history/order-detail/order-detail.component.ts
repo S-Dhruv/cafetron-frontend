@@ -134,6 +134,23 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  isPickupQrAvailable(): boolean {
+    if (!this.order || this.isOrderClosed()) {
+      return false;
+    }
+
+    const orderStatus = this.order.overallStatus?.toUpperCase();
+    return orderStatus === 'VENDOR_ACCEPTED' || orderStatus === 'READY_FOR_PICKUP';
+  }
+
+  getPickupQrUnavailableMessage(): string {
+    if (this.isOrderClosed()) {
+      return 'Pickup QR is disabled because this order is cancelled or refunded.';
+    }
+
+    return 'Pickup QR will be available after the vendor accepts your order.';
+  }
+
   getTimeoutButtonLabel(): string {
     if (this.isProcessingTimeout) {
       return 'Processing...';

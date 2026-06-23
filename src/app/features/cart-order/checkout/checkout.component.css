@@ -138,6 +138,32 @@ h4 {
   font-weight: 800;
 }
 
+.place-order-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 138, 122, 0.45);
+  border-radius: 12px;
+  background: rgba(255, 138, 122, 0.12);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.place-order-error .material-symbols-outlined {
+  flex: 0 0 auto;
+  font-size: 19px;
+}
+
+.place-order-error span:last-child {
+  min-width: 0;
+}
+
 .checkout-toast {
   position: fixed;
   right: 22px;

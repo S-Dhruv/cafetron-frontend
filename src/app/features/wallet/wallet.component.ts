@@ -147,6 +147,34 @@ export class WalletComponent implements OnInit, OnDestroy {
       });
   }
 
+  formatDateTime(value: string | number[] | null | undefined): string {
+    const date = this.toDate(value);
+    if (!date) {
+      return 'Not available';
+    }
+
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(date);
+  }
+
+  private toDate(value: string | number[] | null | undefined): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    if (Array.isArray(value)) {
+      const [year, month, day, hour = 0, minute = 0, second = 0] = value;
+      const date = new Date(year, month - 1, day, hour, minute, second);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    const normalizedValue = value.includes('T') ? value : value.replace(' ', 'T');
+    const date = new Date(normalizedValue);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

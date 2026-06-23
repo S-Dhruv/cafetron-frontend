@@ -22,9 +22,9 @@ type NavItem = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-container *ngIf="isVisible">
-      <div class="bottom-nav-spacer" aria-hidden="true"></div>
+      <div class="app-bottom-nav-spacer" aria-hidden="true"></div>
 
-      <nav class="bottom-nav" aria-label="Primary navigation">
+      <nav class="app-bottom-nav" aria-label="Primary navigation">
         <a
           *ngFor="let item of navItems"
           [id]="item.id"
@@ -41,18 +41,23 @@ type NavItem = {
   styles: [`
     :host {
       display: contents;
+      --app-bottom-nav-height: calc(92px + env(safe-area-inset-bottom, 0px));
     }
 
-    .bottom-nav-spacer {
-      height: calc(92px + env(safe-area-inset-bottom, 0px));
+    .app-bottom-nav-spacer {
+      flex: 0 0 var(--app-bottom-nav-height);
+      height: var(--app-bottom-nav-height);
     }
 
-    .bottom-nav {
+    .app-bottom-nav {
+      box-sizing: border-box;
       position: fixed;
       left: 50%;
+      right: auto;
       bottom: 12px;
       z-index: 80;
       display: grid;
+      grid-template-columns: none;
       grid-auto-flow: column;
       grid-auto-columns: minmax(0, 1fr);
       gap: 8px;
@@ -67,7 +72,7 @@ type NavItem = {
       transform: translateX(-50%);
     }
 
-    .bottom-nav a {
+    .app-bottom-nav a {
       display: grid;
       place-items: center;
       gap: 6px;
@@ -84,34 +89,34 @@ type NavItem = {
       transition: transform 180ms ease, background 180ms ease, color 180ms ease;
     }
 
-    .bottom-nav a:hover {
+    .app-bottom-nav a:hover {
       transform: translateY(-2px);
       color: #fff;
     }
 
-    .bottom-nav a.active {
+    .app-bottom-nav a.active {
       background: linear-gradient(135deg, rgba(249, 115, 22, 0.96), rgba(251, 146, 60, 0.84));
       color: #fff;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 24px rgba(249, 115, 22, 0.28);
     }
 
-    .bottom-nav .material-symbols-outlined {
+    .app-bottom-nav .material-symbols-outlined {
       font-size: 22px;
     }
 
     @media (max-width: 560px) {
-      .bottom-nav {
+      .app-bottom-nav {
         gap: 6px;
         padding-inline: 8px;
       }
 
-      .bottom-nav a {
+      .app-bottom-nav a {
         min-height: 54px;
         padding-inline: 4px;
         font-size: 11px;
       }
 
-      .bottom-nav .material-symbols-outlined {
+      .app-bottom-nav .material-symbols-outlined {
         font-size: 20px;
       }
     }
