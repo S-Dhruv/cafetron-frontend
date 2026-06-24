@@ -9,29 +9,20 @@ export const SKIP_AUTH_REDIRECT = new HttpContextToken<boolean>(() => false);
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const token = authService.getToken();
-  const isAuthRequest = req.url.includes('/auth/login') || req.url.includes('/auth/register');
 
-  if (token && !isAuthRequest) {
-    req = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
+  // Apply cross-origin credential passing globally
+  req = req.clone({
+    withCredentials: true
+  });
 
   return next(req).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
         if (error.status === 401 && authService.isLoggedIn() && !req.context.get(SKIP_AUTH_REDIRECT)) {
-          authService.logout();
+          authService.cleanLocalSession();
           router.navigate(['/login']);
         }
-
-        // Let feature pages handle 403s locally. Redirecting here can make a
-        // routed component appear to never load, especially on vendor pages.
       }
-
       return throwError(() => error);
     })
   );
