@@ -16,8 +16,6 @@ import {
 export class AuthService {
 
   private readonly API = environment.apiUrl;
-  private readonly TOKEN_KEY = 'jwt_token';
-  private readonly LEGACY_TOKEN_KEYS = ['cafetron_token', 'auth_token'];
   private readonly USER_KEY = 'cafetron_user';
 
   constructor(private http: HttpClient) {}
@@ -51,61 +49,47 @@ export class AuthService {
       ...response,
       role: this.normalizeRole(response.role) || response.role,
     };
-
-    localStorage.setItem(this.TOKEN_KEY, response.token);
-    this.LEGACY_TOKEN_KEYS.forEach((key) => localStorage.removeItem(key));
+    // Save user profile details only (token value arrives as null from backend safely)
     localStorage.setItem(this.USER_KEY, JSON.stringify(normalizedResponse));
   }
 
-  logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    this.LEGACY_TOKEN_KEYS.forEach((key) => localStorage.removeItem(key));
+  // Clears frontend memory state only
+  cleanLocalSession(): void {
     localStorage.removeItem(this.USER_KEY);
+    // Purges old legacy tokens left in client storage from previous git versions
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('cafetron_token');
+    localStorage.removeItem('auth_token');
+  }
+
+  logout(): void {
+    // Call backend to drop the HTTP Cookie via Max-Age = 0 setup
+    this.http.post(`${this.API}/auth/logout`, {}, { withCredentials: true }).subscribe({
+      next: () => this.cleanLocalSession(),
+      error: () => this.cleanLocalSession() // Fallback clean if offline
+    });
   }
 
   private getStoredUser(): AuthResponse | null {
     const user = localStorage.getItem(this.USER_KEY);
-    if (!user) {
-      return null;
-    }
+    if (!user) return null;
 
     try {
       return JSON.parse(user) as AuthResponse;
     } catch {
-      localStorage.removeItem(this.USER_KEY);
+      this.cleanLocalSession();
       return null;
     }
-  }
-
-  getToken(): string | null {
-    const primary = localStorage.getItem(this.TOKEN_KEY);
-    if (primary) {
-      return primary;
-    }
-
-    for (const key of this.LEGACY_TOKEN_KEYS) {
-      const legacy = localStorage.getItem(key);
-      if (legacy) {
-        localStorage.setItem(this.TOKEN_KEY, legacy);
-        localStorage.removeItem(key);
-        return legacy;
-      }
-    }
-
-    return null;
   }
 
   isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    // Session validity is defined by active cache existence instead of explicit raw tokens
+    return this.getStoredUser() !== null;
   }
 
   getRole(): string | null {
-    const role = this.getStoredUser()?.role || this.getRoleFromToken();
-    if (!role) {
-      return null;
-    }
-
-    return this.normalizeRole(role);
+    const role = this.getStoredUser()?.role;
+    return role ? this.normalizeRole(role) : null;
   }
 
   getUserName(): string | null {
@@ -133,35 +117,8 @@ export class AuthService {
   }
 
   private normalizeRole(role: string | null | undefined): string | null {
-    if (!role) {
-      return null;
-    }
-
+    if (!role) return null;
     const normalizedRole = String(role).replace(/^ROLE_/i, '').trim().toUpperCase();
     return normalizedRole === APP_ROLES.counter ? APP_ROLES.vendor : normalizedRole;
-  }
-
-  private getRoleFromToken(): string | null {
-    const token = this.getToken();
-    if (!token) {
-      return null;
-    }
-
-    const [, payload] = token.split('.');
-    if (!payload) {
-      return null;
-    }
-
-    try {
-      const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
-      const paddedPayload = normalizedPayload.padEnd(
-        normalizedPayload.length + ((4 - (normalizedPayload.length % 4)) % 4),
-        '='
-      );
-      const decoded = JSON.parse(atob(paddedPayload));
-      return this.normalizeRole(decoded?.role);
-    } catch {
-      return null;
-    }
   }
 }
